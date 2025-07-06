@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spare4Spare - Post a Listing</title>
+  <style>
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      color: #2b72ff;
+    }
+
+    nav {
+      background-color: #a8d0ff;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-container svg.logo {
+      width: 36px;
+      height: 36px;
+      stroke: #2b72ff;
+      stroke-width: 4;
+      fill: none;
+    }
+
+    .logo-container h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2b72ff;
+      margin: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #2b72ff;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .nav-links a:hover {
+      background-color: #2b72ff;
+      color: white;
+    }
+
+    /* Centering container */
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: calc(100vh - 60px);
+      padding: 20px;
+      margin-top: 60px; /* to avoid nav overlap */
+    }
+
+    /* Form styles */
+    form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(43, 114, 255, 0.2);
+      max-width: 600px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 2px solid #d0e5ff;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 24px;
+      background-color: #2b72ff;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1a5edc;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo-container">
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M20 44l8-8-8-8M44 20l-8 8 8 8" /><path d="M28 36l8-8" /></svg>
+      <h2>Spare4Spare</h2>
+    </div>
+    <div class="nav-links">
+      <a href="homepage.html">Home</a>
+      <a href="post.html">Post</a>
+      <a href="account.html">Account</a>
+      <a href="contact.html">Contact</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="settings.html">Settings</a>
+    </div>
+  </nav>
+
+  <main>
+    <form id="listing-form" novalidate>
+      <h1>Post a Listing</h1>
+
+      <label for="image">Image URL</label>
+      <input type="url" id="image" required placeholder="https://example.com/image.jpg" />
+
+      <label for="title">Title</label>
+      <input type="text" id="title" required placeholder="What are you offering?" />
+
+      <label for="description">Description</label>
+      <textarea id="description" rows="4" required placeholder="Details about your offer"></textarea>
+
+      <label for="wanted">What You Want in Return</label>
+      <input type="text" id="wanted" required placeholder="What are you looking for?" />
+
+      <button type="submit">Submit Listing</button>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById("listing-form");
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!currentUser) {
+      alert("Please log in first.");
+      window.location.href = "login.html";
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const listing = {
+        image: document.getElementById("image").value.trim(),
+        title: document.getElementById("title").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        wanted: document.getElementById("wanted").value.trim(),
+        user: currentUser.name || "Anonymous",
+        id: Date.now()
+      };
+
+      const listings = JSON.parse(localStorage.getItem("listings") || "[]");
+      listings.push(listing);
+      localStorage.setItem("listings", JSON.stringify(listings));
+
+      window.location.href = "homepage.html";
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spare4Spare - Settings</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    nav {
+      background-color: #a8d0ff;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-container svg.logo {
+      width: 36px;
+      height: 36px;
+      stroke: #2b72ff;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
+    }
+
+    .logo-container h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2b72ff;
+      margin: 0;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
+    }
+
+    .nav-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      font-weight: 800;
+      color: #2b72ff;
+      letter-spacing: 1px;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #2b72ff;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .nav-links a:hover {
+      background-color: #2b72ff;
+      color: white;
+    }
+
+    main {
+      height: calc(100vh - 60px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #2b72ff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .page-title {
+      font-size: 36px;
+      font-weight: 800;
+      color: #2b72ff;
+      letter-spacing: 1px;
+      margin: 20px 0;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo-container">
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M20 44l8-8-8-8M44 20l-8 8 8 8" />
+        <path d="M28 36l8-8" />
+      </svg>
+      <h2>Spare4Spare</h2>
+    </div>
+    <div class="nav-title">Settings</div>
+    <div class="nav-links">
+      <a href="homepage.html">Home</a>
+      <a href="post.html">Post</a>
+      <a href="account.html">Account</a>
+      <a href="contact.html">Contact</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="settings.html">Settings</a>
+    </div>
+  </nav>
+</body>
+</html>
