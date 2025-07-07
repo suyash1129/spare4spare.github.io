@@ -2,21 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Spare4Spare - Post a Listing</title>
+  <title>Spare4Spare - Post Listing</title>
   <style>
-    /* Reset and base */
-    * {
-      box-sizing: border-box;
-    }
-
-    body, html {
-      height: 100%;
-      margin: 0;
+    body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f0f4f8;
+      margin: 0;
       color: #2b72ff;
+      text-align: center;
       opacity: 0;
-      animation: fadeIn 0.7s ease forwards;
+      animation: fadeIn 1s ease forwards;
     }
 
     @keyframes fadeIn {
@@ -24,7 +19,7 @@
         opacity: 1;
       }
     }
-
+    
     nav {
       background-color: #a8d0ff;
       height: 60px;
@@ -33,27 +28,23 @@
       justify-content: space-between;
       padding: 0 20px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 10;
+      position: relative;
     }
-
     .logo-container {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
     .logo-container svg.logo {
       width: 36px;
       height: 36px;
       stroke: #2b72ff;
       stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
       fill: none;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
     }
-
     .logo-container h2 {
       font-size: 28px;
       font-weight: 800;
@@ -61,12 +52,10 @@
       margin: 0;
       filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
     }
-
     .nav-links {
       display: flex;
       gap: 20px;
     }
-
     .nav-links a {
       text-decoration: none;
       color: #2b72ff;
@@ -76,72 +65,40 @@
       border-radius: 6px;
       transition: background-color 0.2s;
     }
-
     .nav-links a:hover {
       background-color: #2b72ff;
       color: white;
     }
-
-    /* Centering container */
-    main {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: calc(100vh - 60px);
-      padding: 20px;
-      margin-top: 60px; /* to avoid nav overlap */
-    }
-
-    /* Form styles */
     form {
       background: white;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 10px 20px rgba(43, 114, 255, 0.2);
-      max-width: 600px;
-      width: 100%;
-      box-sizing: border-box;
+      width: 350px;
+      margin: 40px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
-
-    h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    label {
-      display: block;
-      margin-top: 16px;
-      font-weight: bold;
-    }
-
     input, textarea {
-      width: 100%;
       padding: 10px;
-      margin-top: 6px;
-      border: 2px solid #d0e5ff;
-      border-radius: 6px;
       font-size: 14px;
-      font-family: inherit;
-      resize: vertical;
+      border: 2px solid #a8d0ff;
+      border-radius: 8px;
+      resize: none;
     }
-
     button {
-      margin-top: 24px;
       background-color: #2b72ff;
       color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
       font-weight: 700;
-      transition: background-color 0.3s ease;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
     }
-
     button:hover {
-      background-color: #1a5edc;
+      background-color: #1e4fcc;
     }
   </style>
 </head>
@@ -149,7 +106,10 @@
 
   <nav>
     <div class="logo-container">
-      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M20 44l8-8-8-8M44 20l-8 8 8 8" /><path d="M28 36l8-8" /></svg>
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M20 44l8-8-8-8M44 20l-8 8 8 8" />
+        <path d="M28 36l8-8" />
+      </svg>
       <h2>Spare4Spare</h2>
     </div>
     <div class="nav-links">
@@ -162,52 +122,72 @@
     </div>
   </nav>
 
-  <main>
-    <form id="listing-form" novalidate>
-      <h1>Post a Listing</h1>
+  <form id="post-form">
+    <h2>Post a New Listing</h2>
+    <input type="text" id="title" placeholder="Title" required />
+    <input type="text" id="wanted" placeholder="Looking For" required />
+    <textarea id="description" placeholder="Description" rows="4" required></textarea>
+    <input type="url" id="image" placeholder="Image URL" required />
+    <button type="submit">Post Listing</button>
+  </form>
 
-      <label for="image">Image URL</label>
-      <input type="url" id="image" required placeholder="https://example.com/image.jpg" />
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      <label for="title">Title</label>
-      <input type="text" id="title" required placeholder="What are you offering?" />
+    const firebaseConfig = {
+      apiKey: "AIzaSyCAhKrkmaVp3Q2b0IqYOq4OBlFd2AOk8bQ",
+      authDomain: "spare4spare.firebaseapp.com",
+      projectId: "spare4spare",
+      storageBucket: "spare4spare.appspot.com",
+      messagingSenderId: "723016916320",
+      appId: "1:723016916320:web:f917fb1d5b8882574b9205",
+      measurementId: "G-2NQ3EPSWPD"
+    };
 
-      <label for="description">Description</label>
-      <textarea id="description" rows="4" required placeholder="Details about your offer"></textarea>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-      <label for="wanted">What You Want in Return</label>
-      <input type="text" id="wanted" required placeholder="What are you looking for?" />
+    const form = document.getElementById("post-form");
 
-      <button type="submit">Submit Listing</button>
-    </form>
-  </main>
-
-  <script>
-    const form = document.getElementById("listing-form");
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-    if (!currentUser) {
-      alert("Please log in first.");
-      window.location.href = "login.html";
-    }
-
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const listing = {
-        image: document.getElementById("image").value.trim(),
-        title: document.getElementById("title").value.trim(),
-        description: document.getElementById("description").value.trim(),
-        wanted: document.getElementById("wanted").value.trim(),
-        user: currentUser.name || "Anonymous",
-        id: Date.now()
-      };
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (!currentUser) {
+        alert("Please login to post listings.");
+        window.location.href = "login.html";
+        return;
+      }
 
-      const listings = JSON.parse(localStorage.getItem("listings") || "[]");
-      listings.push(listing);
-      localStorage.setItem("listings", JSON.stringify(listings));
+      const title = document.getElementById("title").value.trim();
+      const wanted = document.getElementById("wanted").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const image = document.getElementById("image").value.trim();
 
-      window.location.href = "homepage.html";
+      if (!title || !wanted || !description || !image) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "listings"), {
+          title,
+          wanted,
+          description,
+          image,
+          user: currentUser.name || "Anonymous",
+          userId: currentUser.uid || currentUser.id || "unknown", // store user ID for ownership
+          createdAt: serverTimestamp()
+        });
+
+        alert("Listing posted successfully!");
+        form.reset();
+        window.location.href = "homepage.html";
+      } catch (error) {
+        console.error("Error adding listing:", error);
+        alert("Failed to post listing. Please try again.");
+      }
     });
   </script>
 
