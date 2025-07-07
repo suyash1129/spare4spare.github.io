@@ -2,24 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Spare4Spare - Post Listing</title>
+  <title>Post a Listing - Spare4Spare</title>
   <style>
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f0f4f8;
       margin: 0;
+      padding: 0;
       color: #2b72ff;
-      text-align: center;
       opacity: 0;
-      animation: fadeIn 1s ease forwards;
+      animation: fadeIn 0.7s ease forwards;
     }
 
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+      to { opacity: 1; }
     }
-    
+
     nav {
       background-color: #a8d0ff;
       height: 60px;
@@ -30,11 +28,13 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       position: relative;
     }
+
     .logo-container {
       display: flex;
       align-items: center;
       gap: 10px;
     }
+
     .logo-container svg.logo {
       width: 36px;
       height: 36px;
@@ -45,17 +45,28 @@
       fill: none;
       filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
     }
+
     .logo-container h2 {
       font-size: 28px;
       font-weight: 800;
       color: #2b72ff;
       margin: 0;
-      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
     }
+
+    .nav-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      font-weight: 800;
+      color: #2b72ff;
+    }
+
     .nav-links {
       display: flex;
       gap: 20px;
     }
+
     .nav-links a {
       text-decoration: none;
       color: #2b72ff;
@@ -65,53 +76,67 @@
       border-radius: 6px;
       transition: background-color 0.2s;
     }
+
     .nav-links a:hover {
       background-color: #2b72ff;
       color: white;
     }
-    form {
+
+    main {
+      max-width: 600px;
+      margin: 40px auto;
       background: white;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 10px 20px rgba(43, 114, 255, 0.2);
-      width: 350px;
-      margin: 40px auto;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 24px;
+      color: #2b72ff;
+    }
+
+    form {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 16px;
     }
+
     input, textarea {
-      padding: 10px;
-      font-size: 14px;
-      border: 2px solid #a8d0ff;
-      border-radius: 8px;
-      resize: none;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #a8d0ff;
+      font-size: 16px;
+      width: 100%;
     }
+
     button {
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
       background-color: #2b72ff;
       color: white;
-      font-weight: 700;
-      padding: 12px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
     }
+
     button:hover {
-      background-color: #1e4fcc;
+      background-color: #1a5edc;
     }
   </style>
 </head>
 <body>
-
   <nav>
     <div class="logo-container">
-      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
         <path d="M20 44l8-8-8-8M44 20l-8 8 8 8" />
         <path d="M28 36l8-8" />
       </svg>
       <h2>Spare4Spare</h2>
     </div>
+    <div class="nav-title">Post</div>
     <div class="nav-links">
       <a href="homepage.html">Home</a>
       <a href="post.html">Post</a>
@@ -122,18 +147,27 @@
     </div>
   </nav>
 
-  <form id="post-form">
-    <h2>Post a New Listing</h2>
-    <input type="text" id="title" placeholder="Title" required />
-    <input type="text" id="wanted" placeholder="Looking For" required />
-    <textarea id="description" placeholder="Description" rows="4" required></textarea>
-    <input type="url" id="image" placeholder="Image URL" required />
-    <button type="submit">Post Listing</button>
-  </form>
+  <main>
+    <h1 id="form-title">Create a Listing</h1>
+    <form id="listing-form">
+      <input type="text" id="title" placeholder="Title" required />
+      <textarea id="description" placeholder="Description" required></textarea>
+      <input type="text" id="wanted" placeholder="What do you want in exchange?" required />
+      <input type="url" id="image" placeholder="Image URL" required />
+      <button type="submit">Submit</button>
+    </form>
+  </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      updateDoc,
+      doc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCAhKrkmaVp3Q2b0IqYOq4OBlFd2AOk8bQ",
@@ -148,48 +182,58 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const form = document.getElementById("post-form");
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser) window.location.href = "login.html";
+
+    const form = document.getElementById("listing-form");
+    const titleInput = document.getElementById("title");
+    const descriptionInput = document.getElementById("description");
+    const wantedInput = document.getElementById("wanted");
+    const imageInput = document.getElementById("image");
+    const formTitle = document.getElementById("form-title");
+
+    const editData = JSON.parse(localStorage.getItem("editListing"));
+
+    // If editing
+    if (editData) {
+      formTitle.textContent = "Edit Listing";
+      const { listing } = editData;
+      titleInput.value = listing.title;
+      descriptionInput.value = listing.description;
+      wantedInput.value = listing.wanted;
+      imageInput.value = listing.image;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-      if (!currentUser) {
-        alert("Please login to post listings.");
-        window.location.href = "login.html";
-        return;
-      }
-
-      const title = document.getElementById("title").value.trim();
-      const wanted = document.getElementById("wanted").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const image = document.getElementById("image").value.trim();
-
-      if (!title || !wanted || !description || !image) {
-        alert("Please fill in all fields.");
-        return;
-      }
+      const data = {
+        title: titleInput.value,
+        description: descriptionInput.value,
+        wanted: wantedInput.value,
+        image: imageInput.value,
+        user: currentUser.name,
+        email: currentUser.email || "",
+        createdAt: serverTimestamp()
+      };
 
       try {
-        await addDoc(collection(db, "listings"), {
-          title,
-          wanted,
-          description,
-          image,
-          user: currentUser.name || "Anonymous",
-          userId: currentUser.uid || currentUser.id || "unknown", // store user ID for ownership
-          createdAt: serverTimestamp()
-        });
+        if (editData) {
+          // Update existing listing
+          const listingRef = doc(db, "listings", editData.id);
+          await updateDoc(listingRef, data);
+          localStorage.removeItem("editListing");
+        } else {
+          // Create new listing
+          await addDoc(collection(db, "listings"), data);
+        }
 
-        alert("Listing posted successfully!");
-        form.reset();
-        window.location.href = "homepage.html";
-      } catch (error) {
-        console.error("Error adding listing:", error);
-        alert("Failed to post listing. Please try again.");
+        window.location.href = "account.html";
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+        console.error(err);
       }
     });
   </script>
-
 </body>
 </html>
