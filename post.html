@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Post a Listing - Spare4Spare</title>
+  <title>Spare4Spare - Post a Listing</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f0f4f8;
@@ -12,6 +16,9 @@
       color: #2b72ff;
       opacity: 0;
       animation: fadeIn 0.7s ease forwards;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
     @keyframes fadeIn {
@@ -27,6 +34,7 @@
       padding: 0 20px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       position: relative;
+      flex-shrink: 0;
     }
 
     .logo-container {
@@ -51,6 +59,7 @@
       font-weight: 800;
       color: #2b72ff;
       margin: 0;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
     }
 
     .nav-title {
@@ -82,9 +91,17 @@
       color: white;
     }
 
+    .form-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
     main {
+      width: 100%;
       max-width: 600px;
-      margin: 40px auto;
       background: white;
       padding: 30px;
       border-radius: 12px;
@@ -147,16 +164,18 @@
     </div>
   </nav>
 
-  <main>
-    <h1 id="form-title">Create a Listing</h1>
-    <form id="listing-form">
-      <input type="text" id="title" placeholder="Title" required />
-      <textarea id="description" placeholder="Description" required></textarea>
-      <input type="text" id="wanted" placeholder="What do you want in exchange?" required />
-      <input type="url" id="image" placeholder="Image URL" required />
-      <button type="submit">Submit</button>
-    </form>
-  </main>
+  <div class="form-wrapper">
+    <main>
+      <h1 id="form-title">Create a Listing</h1>
+      <form id="listing-form">
+        <input type="text" id="title" placeholder="Title" required />
+        <textarea id="description" placeholder="Description" required></textarea>
+        <input type="text" id="wanted" placeholder="What do you want in exchange?" required />
+        <input type="url" id="image" placeholder="Image URL" required />
+        <button type="submit">Submit</button>
+      </form>
+    </main>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -194,7 +213,6 @@
 
     const editData = JSON.parse(localStorage.getItem("editListing"));
 
-    // If editing
     if (editData) {
       formTitle.textContent = "Edit Listing";
       const { listing } = editData;
@@ -219,12 +237,10 @@
 
       try {
         if (editData) {
-          // Update existing listing
           const listingRef = doc(db, "listings", editData.id);
           await updateDoc(listingRef, data);
           localStorage.removeItem("editListing");
         } else {
-          // Create new listing
           await addDoc(collection(db, "listings"), data);
         }
 
