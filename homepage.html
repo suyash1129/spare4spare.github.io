@@ -11,7 +11,7 @@
       color: #2b72ff;
       text-align: center;
       opacity: 0;
-      animation: fadeIn 0.7s ease forwards;
+      animation: fadeIn 1s ease forwards;
     }
 
     @keyframes fadeIn {
@@ -76,7 +76,6 @@
       color: white;
     }
 
-    /* Welcome Message */
     #welcome-message {
       font-size: 42px;
       font-weight: 700;
@@ -93,7 +92,6 @@
       z-index: 1000;
     }
 
-    /* Listings Container */
     #offers-container {
       width: 95%;
       max-width: 1200px;
@@ -196,7 +194,24 @@
     <div class="offers-grid"></div>
   </div>
 
-  <script>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCAhKrkmaVp3Q2b0IqYOq4OBlFd2AOk8bQ",
+      authDomain: "spare4spare.firebaseapp.com",
+      projectId: "spare4spare",
+      storageBucket: "spare4spare.appspot.com",
+      messagingSenderId: "723016916320",
+      appId: "1:723016916320:web:f917fb1d5b8882574b9205",
+      measurementId: "G-2NQ3EPSWPD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     const welcomeEl = document.getElementById("welcome-message");
     const offersEl = document.getElementById("offers-container");
@@ -216,36 +231,48 @@
           void offersEl.offsetWidth;
           offersEl.classList.add("visible");
 
-          loadListings(); // Load listings for everyone
+          loadListings();
         }, 500);
       }, 1700);
     }
 
-    function loadListings() {
-      const savedListings = JSON.parse(localStorage.getItem("listings") || "[]");
+    async function loadListings() {
+      const listingsRef = collection(db, "listings");
+      const listingsQuery = query(listingsRef, orderBy("createdAt", "desc"));
 
-      if (savedListings.length === 0) {
-        offersGrid.innerHTML = `<p style="font-size: 16px; color: #666;">No listings posted yet.</p>`;
-        return;
+      try {
+        const snapshot = await getDocs(listingsQuery);
+
+        if (snapshot.empty) {
+          offersGrid.innerHTML = `<p style="font-size: 16px; color: #666;">No listings posted yet.</p>`;
+          return;
+        }
+
+        offersGrid.innerHTML = "";
+
+        snapshot.forEach(doc => {
+          const listing = doc.data();
+          const card = document.createElement("div");
+          card.className = "offer-card";
+
+          card.innerHTML = `
+            <img src="${listing.image}" alt="${listing.title}" />
+            <div class="offer-title">${listing.title}</div>
+            <div class="offer-description">${listing.description}</div>
+            <div class="offer-user">
+              Looking for: ${listing.wanted}<br>
+              Posted by: ${listing.user}<br>
+              <small>${listing.createdAt?.toDate().toLocaleString() || ""}</small>
+            </div>
+          `;
+
+          offersGrid.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error loading listings:", err);
+        offersGrid.innerHTML = `<p>Error loading listings. Please try again later.</p>`;
       }
-
-      offersGrid.innerHTML = "";
-
-      savedListings.forEach(listing => {
-        const card = document.createElement("div");
-        card.className = "offer-card";
-
-        card.innerHTML = `
-          <img src="${listing.image}" alt="${listing.title}" />
-          <div class="offer-title">${listing.title}</div>
-          <div class="offer-description">${listing.description}</div>
-          <div class="offer-user">Looking for: ${listing.wanted}<br>Posted by: ${listing.user}</div>
-        `;
-
-        offersGrid.appendChild(card);
-      });
     }
   </script>
-
 </body>
 </html>
