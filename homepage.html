@@ -15,9 +15,7 @@
     }
 
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+      to { opacity: 1; }
     }
 
     nav {
@@ -133,11 +131,14 @@
       width: 240px;
       padding: 12px;
       box-shadow: 0 4px 12px rgba(43, 114, 255, 0.1);
-      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .offer-card:hover {
       transform: translateY(-6px);
+      transition: transform 0.3s ease;
     }
 
     .offer-card img {
@@ -151,27 +152,42 @@
     .offer-title {
       font-size: 18px;
       font-weight: 700;
-      margin: 0 0 6px 0;
       color: #2b72ff;
+      margin: 0 0 6px 0;
     }
 
     .offer-description {
       font-size: 14px;
       color: #4a6fa1;
+      margin-bottom: 6px;
     }
 
     .offer-user {
       font-size: 12px;
       color: #7a8fa5;
-      margin-top: 6px;
+      margin-bottom: 10px;
+    }
+
+    .view-btn {
+      padding: 8px;
+      background-color: #2b72ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .view-btn:hover {
+      background-color: #1a5edc;
     }
   </style>
 </head>
 <body>
-
   <nav>
     <div class="logo-container">
-      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
         <path d="M20 44l8-8-8-8M44 20l-8 8 8 8" />
         <path d="M28 36l8-8" />
       </svg>
@@ -194,7 +210,6 @@
     <div class="offers-grid"></div>
   </div>
 
-  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -252,6 +267,8 @@
 
         snapshot.forEach(doc => {
           const listing = doc.data();
+          const listingId = doc.id;
+
           const card = document.createElement("div");
           card.className = "offer-card";
 
@@ -264,7 +281,13 @@
               Posted by: ${listing.user}<br>
               <small>${listing.createdAt?.toDate().toLocaleString() || ""}</small>
             </div>
+            <button class="view-btn">View</button>
           `;
+
+          card.querySelector(".view-btn").addEventListener("click", () => {
+            localStorage.setItem("viewListing", JSON.stringify({ id: listingId, listing }));
+            window.location.href = "view.html";
+          });
 
           offersGrid.appendChild(card);
         });
