@@ -247,6 +247,7 @@
         window.location.href = "account.html";
       } catch (err) {
         alert("Something went wrong. Please try again.");
+        console.error("Error posting listing:", error);
         console.error(err);
       }
     });
