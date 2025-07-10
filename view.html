@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spare4Spare - View Listing</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      color: #2b72ff;
+      opacity: 0;
+      animation: fadeIn 0.7s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    nav {
+      background-color: #a8d0ff;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-container svg.logo {
+      width: 36px;
+      height: 36px;
+      stroke: #2b72ff;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
+    }
+
+    .logo-container h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2b72ff;
+      margin: 0;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #2b72ff;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .nav-links a:hover {
+      background-color: #2b72ff;
+      color: white;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(43, 114, 255, 0.2);
+    }
+
+    .listing-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #2b72ff;
+    }
+
+    .listing-info {
+      font-size: 16px;
+      color: #4a6fa1;
+      margin-bottom: 10px;
+    }
+
+    .listing-meta {
+      font-size: 14px;
+      color: #7a8fa5;
+      margin-bottom: 30px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .back-btn {
+      background-color: #ff4d4f;
+      color: white;
+    }
+
+    .back-btn:hover {
+      background-color: #d9363e;
+    }
+
+    .offer-btn {
+      background-color: #2b72ff;
+      color: white;
+    }
+
+    .offer-btn:hover {
+      background-color: #1a5edc;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo-container">
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <path d="M20 44l8-8-8-8M44 20l-8 8 8 8" />
+        <path d="M28 36l8-8" />
+      </svg>
+      <h2>Spare4Spare</h2>
+    </div>
+    <div class="nav-links">
+      <a href="homepage.html">Home</a>
+      <a href="post.html">Post</a>
+      <a href="account.html">Account</a>
+      <a href="contact.html">Contact</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="settings.html">Settings</a>
+    </div>
+  </nav>
+
+  <main id="listing-container">
+    <!-- Dynamic content goes here -->
+  </main>
+
+  <script>
+    const container = document.getElementById("listing-container");
+    const data = JSON.parse(localStorage.getItem("viewListing"));
+
+    if (!data || !data.listing) {
+      container.innerHTML = "<p style='color:#999;'>No listing data found.</p>";
+    } else {
+      const { title, description, wanted, user, image, createdAt } = data.listing;
+
+      const createdDate = createdAt?.seconds
+        ? new Date(createdAt.seconds * 1000).toLocaleString()
+        : "Date not available";
+
+      container.innerHTML = `
+        <img class="listing-image" src="${image}" alt="${title}" />
+        <h1>${title}</h1>
+        <div class="listing-info">${description}</div>
+        <div class="listing-info"><strong>Looking for:</strong> ${wanted}</div>
+        <div class="listing-meta">
+          <strong>Posted by:</strong> ${user || "Anonymous"}<br>
+          <strong>Posted on:</strong> ${createdDate}
+        </div>
+        <div class="btn-group">
+          <button class="back-btn" onclick="window.location.href='homepage.html'">← Back</button>
+          <button class="offer-btn" onclick="window.location.href='makeoffer.html'"">Make offer</button>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
