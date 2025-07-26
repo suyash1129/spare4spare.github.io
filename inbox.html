@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Spare4Spare - Inbox</title>
   <style>
-    /* Your existing CSS here */
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f0f4f8;
@@ -13,6 +12,7 @@
       opacity: 0;
       animation: fadeIn 0.7s ease forwards;
     }
+
     @keyframes fadeIn { to { opacity: 1; } }
 
     nav {
@@ -24,11 +24,13 @@
       padding: 0 20px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
+
     .logo-container {
       display: flex;
       align-items: center;
       gap: 10px;
     }
+
     .logo-container svg.logo {
       width: 36px;
       height: 36px;
@@ -37,9 +39,22 @@
       fill: none;
       filter: drop-shadow(0 0 4px rgba(43,114,255,0.4));
     }
+
     .logo-container h2 {
       margin: 0; font-size: 28px; font-weight:800; color:#2b72ff;
     }
+
+    .nav-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      font-weight: 800;
+      color: #2b72ff;
+      letter-spacing: 1px;
+      filter: drop-shadow(0 0 4px rgba(43, 114, 255, 0.4));
+    }
+
     .nav-links { display: flex; gap:20px; }
     .nav-links a {
       text-decoration: none; color: #2b72ff;
@@ -48,24 +63,40 @@
     }
     .nav-links a:hover { background-color:#2b72ff; color:white; }
 
+    #inbox-badge {
+      display: none;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+      vertical-align: super;
+      margin-left: 4px;
+    }
+
     main {
       max-width: 800px; margin:40px auto;
       background:white; padding:30px; border-radius:12px;
       box-shadow: 0 10px 20px rgba(43,114,255,0.2);
     }
+
     h1 {font-size: 28px; margin-bottom:24px; color:#2b72ff;}
+
     .offer-card {
       background:#f8faff; border:2px solid #d0e5ff;
       border-radius:10px; padding:16px; margin-bottom:16px;
       box-shadow: 0 4px 12px rgba(43,114,255,0.1);
     }
+
     .offer-info {margin-bottom:12px; font-size:14px; color:#4a6fa1;}
     .offer-meta { font-size:12px; color:#7a8fa5; margin-bottom:12px;}
+
     .offer-actions button {
       margin-right:8px; padding:8px 14px;
       border:none; border-radius:6px; font-size:14px;
       cursor:pointer; font-weight:bold;
     }
+
     .accept-btn { background:#28a745; color:white; }
     .accept-btn:hover { background:#218838; }
     .decline-btn { background:#dc3545; color:white; }
@@ -80,12 +111,15 @@
       </svg>
       <h2>Spare4Spare</h2>
     </div>
+    <div class="nav-title">Inbox</div>
     <div class="nav-links">
       <a href="homepage.html">Home</a>
       <a href="post.html">Post</a>
       <a href="account.html">Account</a>
       <a href="contact.html">Contact</a>
-      <a href="inbox.html">Inbox</a>
+      <a href="inbox.html" id="inbox-link">
+        Inbox <span id="inbox-badge">!</span>
+      </a>
       <a href="settings.html">Settings</a>
     </div>
   </nav>
@@ -104,80 +138,102 @@
       getDocs, updateDoc, doc
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    async function main() {
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAhKrkmaVp3Q2b0IqYOq4OBlFd2AOk8bQ",
-        authDomain: "spare4spare.firebaseapp.com",
-        projectId: "spare4spare",
-        storageBucket: "spare4spare.appspot.com",
-        messagingSenderId: "723016916320",
-        appId: "1:723016916320:web:f917fb1d5b8882574b9205",
-        measurementId: "G-2NQ3EPSWPD"
-      };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCAhKrkmaVp3Q2b0IqYOq4OBlFd2AOk8bQ",
+      authDomain: "spare4spare.firebaseapp.com",
+      projectId: "spare4spare",
+      storageBucket: "spare4spare.appspot.com",
+      messagingSenderId: "723016916320",
+      appId: "1:723016916320:web:f917fb1d5b8882574b9205",
+      measurementId: "G-2NQ3EPSWPD"
+    };
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const listEl = document.getElementById("offers-list");
 
-      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-      const listEl = document.getElementById("offers-list");
+    if (!currentUser) {
+      window.location.href = "login.html";
+    }
 
-      if (!currentUser) {
-        window.location.href = "login.html";
+    async function loadInbox() {
+      listEl.innerHTML = '<p>Loading...</p>';
+      const q = query(
+        collection(db, "offers"),
+        where("listingOwner", "==", currentUser.name),
+        where("status", "==", "pending")
+      );
+      const snap = await getDocs(q);
+      listEl.innerHTML = "";
+
+      if (snap.empty) {
+        listEl.innerHTML = "<p>No pending offers.</p>";
         return;
       }
 
-      async function loadInbox() {
-        listEl.innerHTML = '<p>Loading...</p>';
-        const q = query(
-          collection(db, "offers"),
-          where("listingOwner", "==", currentUser.name),
-          where("status", "==", "pending")
-        );
-        const snap = await getDocs(q);
-        listEl.innerHTML = "";
-        if (snap.empty) {
-          listEl.innerHTML = "<p>No pending offers.</p>";
-          return;
+      snap.forEach(docSnap => {
+        const o = docSnap.data();
+        const id = docSnap.id;
+        const card = document.createElement("div");
+        card.className = "offer-card";
+
+        const created = o.createdAt?.seconds
+          ? new Date(o.createdAt.seconds * 1000).toLocaleString()
+          : "";
+
+        card.innerHTML = `
+          <div class="offer-info">
+            <strong>${o.offerTitle || "(No title)"}</strong><br>
+            ${o.offerDescription || "(No description)"}
+          </div>
+          <div class="offer-meta">
+            From: ${o.offerUser || "Unknown"} (${o.offerEmail || "No email"})<br>
+            On: ${created}
+          </div>
+          <div class="offer-actions">
+            <button class="accept-btn">Accept</button>
+            <button class="decline-btn">Decline</button>
+          </div>
+        `;
+
+        const [accBtn, decBtn] = card.querySelectorAll("button");
+        accBtn.addEventListener("click", () => respond(id, o.listingId, "accepted"));
+        decBtn.addEventListener("click", () => respond(id, null, "declined"));
+        listEl.appendChild(card);
+      });
+    }
+
+    async function respond(offerId, listingId, status) {
+      await updateDoc(doc(db, "offers", offerId), { status });
+
+      // If accepted, mark the listing as 'completed'
+      if (status === "accepted" && listingId) {
+        try {
+          await updateDoc(doc(db, "listings", listingId), { status: "completed" });
+        } catch (err) {
+          console.error("Failed to update listing status:", err);
         }
-
-        snap.forEach(docSnap => {
-          const o = docSnap.data();
-          const id = docSnap.id;
-          const card = document.createElement("div");
-          card.className = "offer-card";
-          const created = o.createdAt?.seconds
-                          ? new Date(o.createdAt.seconds * 1000).toLocaleString()
-                          : "";
-          card.innerHTML = `
-            <div class="offer-info">
-              <strong>${o.offerTitle}</strong><br>
-              ${o.offerDescription}
-            </div>
-            <div class="offer-meta">
-              From: ${o.offerUser} (${o.offerEmail})<br>
-              On: ${created}
-            </div>
-            <div class="offer-actions">
-              <button class="accept-btn">Accept</button>
-              <button class="decline-btn">Decline</button>
-            </div>
-          `;
-          const [accBtn, decBtn] = card.querySelectorAll("button");
-          accBtn.addEventListener("click", () => respond(id, "accepted"));
-          decBtn.addEventListener("click", () => respond(id, "declined"));
-          listEl.appendChild(card);
-        });
-      }
-
-      async function respond(offerId, status) {
-        await updateDoc(doc(db, "offers", offerId), { status });
-        loadInbox();
       }
 
       loadInbox();
+      checkNewOffers(); // update badge
     }
 
-    main();
+    async function checkNewOffers() {
+      const badge = document.getElementById("inbox-badge");
+      const q = query(
+        collection(db, "offers"),
+        where("listingOwner", "==", currentUser.name),
+        where("status", "==", "pending")
+      );
+      const snap = await getDocs(q);
+      badge.style.display = snap.empty ? "none" : "inline-block";
+    }
+
+    loadInbox();
+    checkNewOffers();
+    setInterval(checkNewOffers, 30000); // optional: auto-check every 30s
   </script>
 </body>
 </html>
